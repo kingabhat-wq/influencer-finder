@@ -1,84 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube Influencer Finder — AI Growth Pipeline</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YouTube Influencer Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0a0b; --surface: #111113; --surface2: #1a1a1d;
-    --border: #2a2a2e; --border2: #3a3a3f;
-    --text: #f0f0f2; --muted: #888890;
-    --accent: #ff4444; --accent2: #cc2222;
-    --green: #22c55e; --amber: #f59e0b; --blue: #4f8ef7; --purple: #a78bfa;
-    --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
-  }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
-  header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon { font-size: 20px; }
-  .logo-text { font-family: var(--mono); font-size: 14px; color: var(--text); letter-spacing: 0.05em; }
-  .badge { font-size: 11px; background: #2d1010; color: var(--accent); padding: 3px 10px; border-radius: 999px; font-family: var(--mono); }
-  main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
-  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
-  .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 36px; }
-  .keys-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  label { font-size: 12px; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; }
-  .key-hint { font-size: 11px; color: #555; margin-top: -4px; }
-  .key-hint a { color: var(--blue); text-decoration: none; }
-  select, input[type="number"], input[type="password"] {
-    background: var(--surface); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 12px; border-radius: 8px; font-size: 14px; font-family: var(--sans); outline: none; transition: border-color 0.15s;
-  }
-  select:focus, input:focus { border-color: var(--accent); }
-  .run-btn { width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--sans); transition: background 0.15s; margin-bottom: 28px; }
-  .run-btn:hover { background: var(--accent2); }
-  .run-btn:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
-  .pipeline { display: none; margin-bottom: 28px; }
-  .pipeline.show { display: block; }
-  .progress-track { background: var(--surface2); border-radius: 999px; height: 4px; margin-bottom: 16px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; width: 0%; }
-  .log-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-family: var(--mono); font-size: 12px; max-height: 200px; overflow-y: auto; line-height: 2; }
-  .log-ok { color: var(--green); } .log-info { color: var(--blue); } .log-warn { color: var(--amber); }
-  .stats { display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
-  .stats.show { display: grid; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
-  .stat-val { font-size: 26px; font-weight: 600; font-family: var(--mono); }
-  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .results { display: none; }
-  .results.show { display: block; }
-  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .results-header h2 { font-size: 16px; font-weight: 500; }
-  .export-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: var(--sans); transition: border-color 0.15s; }
-  .export-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .contact-list { display: flex; flex-direction: column; gap: 8px; }
-  .contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; transition: border-color 0.15s; animation: fadeIn 0.3s ease; }
-  .contact-card:hover { border-color: var(--border2); }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; font-family: var(--mono); }
-  .contact-info { flex: 1; min-width: 0; }
-  .contact-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-  .yt-link { font-size: 11px; color: var(--accent); text-decoration: none; font-family: var(--mono); }
-  .yt-link:hover { text-decoration: underline; }
-  .contact-bio { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
-  .contact-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-  .pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-family: var(--mono); }
-  .pill-subs { background: #1a1a2e; color: var(--blue); }
-  .pill-email { background: #1a2e1a; color: var(--green); }
-  .pill-no-email { background: var(--surface2); color: var(--muted); }
-  .score-bar { text-align: right; flex-shrink: 0; }
-  .score-num { font-family: var(--mono); font-size: 18px; font-weight: 500; }
-  .score-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 999px; }
-  @media (max-width: 640px) { .keys-row,.config-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr 1fr; } }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0b;--surface:#111113;--surface2:#1a1a1d;
+  --border:#2a2a2e;--border2:#3a3a3f;--text:#f0f0f2;--muted:#888890;
+  --red:#ff4444;--red2:#cc2222;--green:#22c55e;--amber:#f59e0b;
+  --blue:#4f8ef7;--purple:#a78bfa;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{color:var(--red);font-size:20px;}
+.logo-text{font-family:var(--mono);font-size:14px;letter-spacing:0.05em;}
+.badge{font-size:11px;background:#2d1010;color:var(--red);padding:3px 10px;border-radius:999px;font-family:var(--mono);}
+main{max-width:900px;margin:0 auto;padding:40px 24px;}
+h1{font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px;}
+.subtitle{color:var(--muted);font-size:15px;margin-bottom:36px;}
+.keys-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.config-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+label{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;}
+.hint{font-size:11px;color:#555;margin-top:-2px;}
+.hint a{color:var(--blue);text-decoration:none;}
+select,input[type="number"],input[type="password"]{
+  background:var(--surface);border:1px solid var(--border);color:var(--text);
+  padding:10px 12px;border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;
+}
+select:focus,input:focus{border-color:var(--red);}
+#runBtn{
+  width:100%;padding:14px;background:var(--red);color:#fff;border:none;
+  border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;
+  font-family:var(--sans);margin-bottom:28px;transition:background 0.15s;
+}
+#runBtn:hover{background:var(--red2);}
+#runBtn:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
+.pipeline{display:none;margin-bottom:28px;}
+.pipeline.show{display:block;}
+.progress-track{background:var(--surface2);border-radius:999px;height:4px;margin-bottom:16px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--red);border-radius:999px;transition:width 0.4s ease;width:0%;}
+.log-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--mono);font-size:12px;max-height:200px;overflow-y:auto;line-height:2;}
+.log-ok{color:var(--green);}.log-info{color:var(--blue);}.log-warn{color:var(--amber);}
+.stats{display:none;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+.stats.show{display:grid;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.stat-val{font-size:26px;font-weight:600;font-family:var(--mono);}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;}
+.results{display:none;}
+.results.show{display:block;}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.results-header h2{font-size:16px;font-weight:500;}
+.export-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);}
+.export-btn:hover{border-color:var(--red);color:var(--red);}
+.contact-list{display:flex;flex-direction:column;gap:8px;}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;animation:fadeIn 0.3s ease;}
+.contact-card:hover{border-color:var(--border2);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0;font-family:var(--mono);}
+.contact-info{flex:1;min-width:0;}
+.contact-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.yt-link{font-size:11px;color:var(--red);text-decoration:none;font-family:var(--mono);}
+.contact-bio{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
+.contact-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.pill{font-size:11px;padding:2px 8px;border-radius:999px;font-family:var(--mono);}
+.pill-subs{background:#1a1a2e;color:var(--blue);}
+.pill-email{background:#1a2e1a;color:var(--green);}
+.score-bar{text-align:right;flex-shrink:0;}
+.score-num{font-family:var(--mono);font-size:18px;font-weight:500;}
+.score-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
+.empty{text-align:center;padding:60px;color:var(--muted);font-size:14px;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:999px;}
+@media(max-width:640px){.keys-row,.config-grid{grid-template-columns:1fr;}.stats{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
+
 <header>
   <div class="logo">
     <div class="logo-icon">▶</div>
@@ -94,13 +97,13 @@
   <div class="keys-row">
     <div class="field">
       <label>YouTube Data API Key</label>
-      <input type="password" id="ytKey" placeholder="AIzaSy..." />
-      <div class="key-hint">Free at <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Enable YouTube Data API v3</div>
+      <input type="password" id="ytKey" placeholder="AIzaSy..."/>
+      <div class="hint">Free → <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Enable YouTube Data API v3</div>
     </div>
     <div class="field">
       <label>Gemini API Key</label>
-      <input type="password" id="geminiKey" placeholder="AIzaSy..." />
-      <div class="key-hint">Free at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>
+      <input type="password" id="geminiKey" placeholder="AIzaSy..."/>
+      <div class="hint">Free → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>
     </div>
   </div>
 
@@ -119,21 +122,20 @@
     </div>
     <div class="field">
       <label>Target contacts</label>
-      <input type="number" id="target" value="50" min="10" max="150" />
+      <input type="number" id="target" value="50" min="10" max="150"/>
     </div>
     <div class="field">
-      <label>Min relevance score</label>
+      <label>Min score</label>
       <select id="minScore">
+        <option value="4" selected>4+ (show all)</option>
         <option value="5">5+ (wider net)</option>
         <option value="6">6+ (balanced)</option>
-        <option value="4" selected>4+ (show all)</option>
         <option value="7">7+ (strict)</option>
-        <option value="8">8+ (best only)</option>
       </select>
     </div>
   </div>
 
-  <button class="run-btn" id="runBtn" onclick="runPipeline()">▶ Find YouTube Creators</button>
+  <button id="runBtn">▶ Find YouTube Creators</button>
 
   <div class="pipeline" id="pipeline">
     <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
@@ -143,126 +145,145 @@
   <div class="stats" id="stats">
     <div class="stat"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Channels found</div></div>
     <div class="stat"><div class="stat-val" id="sQual" style="color:var(--green)">0</div><div class="stat-lbl">Qualified</div></div>
-    <div class="stat"><div class="stat-val" id="sEmail" style="color:var(--green)">0</div><div class="stat-lbl">Emails found</div></div>
+    <div class="stat"><div class="stat-val" id="sEmail" style="color:var(--green)">0</div><div class="stat-lbl">With emails</div></div>
     <div class="stat"><div class="stat-val" id="sAvg" style="color:var(--purple)">0</div><div class="stat-lbl">Avg score</div></div>
   </div>
 
   <div class="results" id="results">
     <div class="results-header">
       <h2 id="resultsTitle">Creators</h2>
-      <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+      <button class="export-btn" id="exportBtn">↓ Export CSV</button>
     </div>
     <div class="contact-list" id="contactList"></div>
   </div>
 </main>
 
 <script>
-let allContacts = [];
-const avatarColors = [
+var allContacts = [];
+var avatarColors = [
   ['#2d1010','#ff6b6b'],['#1a2e1a','#22c55e'],
-  ['#1a1a2e','#4f8ef7'],['#2d1228','#a78bfa'],
-  ['#2d2010','#f59e0b'],
+  ['#1a1a2e','#4f8ef7'],['#2d1228','#a78bfa'],['#2d2010','#f59e0b']
 ];
 
-function initials(name) { return (name||'??').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
-function scoreColor(s) { return s>=8?'var(--green)':s>=6?'var(--amber)':'var(--muted)'; }
-
-function log(msg, level='info') {
-  const box = document.getElementById('logBox');
-  const div = document.createElement('div');
-  div.className = `log-${level}`;
+function initials(name) {
+  return (name || '??').split(' ').map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+}
+function scoreColor(s) {
+  return s >= 8 ? 'var(--green)' : s >= 6 ? 'var(--amber)' : 'var(--muted)';
+}
+function addLog(msg, level) {
+  var box = document.getElementById('logBox');
+  var div = document.createElement('div');
+  div.className = 'log-' + (level || 'info');
   div.textContent = msg;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
+function setProgress(v) {
+  document.getElementById('progFill').style.width = v + '%';
+}
 
-async function runPipeline() {
-  const ytKey = document.getElementById('ytKey').value.trim();
-  const geminiKey = document.getElementById('geminiKey').value.trim();
+document.getElementById('runBtn').addEventListener('click', runPipeline);
+document.getElementById('exportBtn').addEventListener('click', exportCSV);
+
+function runPipeline() {
+  var ytKey = document.getElementById('ytKey').value.trim();
+  var geminiKey = document.getElementById('geminiKey').value.trim();
   if (!ytKey || !geminiKey) { alert('Please enter both API keys'); return; }
 
-  const niche = document.getElementById('niche').value;
-  const target = parseInt(document.getElementById('target').value);
-  const minScore = parseInt(document.getElementById('minScore').value);
+  var niche = document.getElementById('niche').value;
+  var target = parseInt(document.getElementById('target').value);
+  var minScore = parseInt(document.getElementById('minScore').value);
 
-  document.getElementById('runBtn').disabled = true;
-  document.getElementById('runBtn').textContent = '⏳ Searching YouTube...';
+  var btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Searching YouTube...';
+
   document.getElementById('pipeline').classList.add('show');
   document.getElementById('logBox').innerHTML = '';
   document.getElementById('stats').classList.remove('show');
   document.getElementById('results').classList.remove('show');
+  setProgress(0);
   allContacts = [];
 
-  try {
-    const res = await fetch('/api/find', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ niche, target, minScore, ytKey, geminiKey }),
-    });
+  fetch('/api/find', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ niche: niche, target: target, minScore: minScore, ytKey: ytKey, geminiKey: geminiKey })
+  }).then(function(res) {
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith('data:')) continue;
-        try {
-          const evt = JSON.parse(line.slice(5).trim());
-          if (evt.type === 'log') log(evt.msg, evt.level);
-          if (evt.type === 'progress') document.getElementById('progFill').style.width = evt.value + '%';
-          if (evt.type === 'done') { allContacts = evt.contacts; showResults(evt.contacts, evt.total); }
-        } catch {}
-      }
+    function read() {
+      return reader.read().then(function(result) {
+        if (result.done) return;
+        buffer += decoder.decode(result.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        lines.forEach(function(line) {
+          if (!line.startsWith('data:')) return;
+          try {
+            var evt = JSON.parse(line.slice(5).trim());
+            if (evt.type === 'log') addLog(evt.msg, evt.level);
+            if (evt.type === 'progress') setProgress(evt.value);
+            if (evt.type === 'done') {
+              allContacts = evt.contacts;
+              showResults(evt.contacts, evt.total);
+            }
+          } catch(e) {}
+        });
+        return read();
+      });
     }
-  } catch (e) { log('✗ Error: ' + e.message, 'warn'); }
-
-  document.getElementById('runBtn').disabled = false;
-  document.getElementById('runBtn').textContent = '▶ Run Again';
+    return read();
+  }).catch(function(e) {
+    addLog('✗ Error: ' + e.message, 'warn');
+  }).finally(function() {
+    btn.disabled = false;
+    btn.textContent = '▶ Run Again';
+  });
 }
 
 function showResults(contacts, total) {
-  const emails = contacts.filter(c => c.email).length;
-  const avg = contacts.length ? (contacts.reduce((s,c)=>s+c.score,0)/contacts.length).toFixed(1) : 0;
+  var emails = contacts.filter(function(c){ return c.email; }).length;
+  var avg = contacts.length ? (contacts.reduce(function(s,c){ return s+c.score; }, 0) / contacts.length).toFixed(1) : 0;
   document.getElementById('sTotal').textContent = total;
   document.getElementById('sQual').textContent = contacts.length;
   document.getElementById('sEmail').textContent = emails;
   document.getElementById('sAvg').textContent = avg;
   document.getElementById('stats').classList.add('show');
   renderCards(contacts);
-  document.getElementById('resultsTitle').textContent = `${contacts.length} YouTube Creators`;
+  document.getElementById('resultsTitle').textContent = contacts.length + ' YouTube Creators';
   document.getElementById('results').classList.add('show');
 }
 
 function renderCards(contacts) {
-  const list = document.getElementById('contactList');
-  if (!contacts.length) { list.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted);">No results. Try lowering the min score or changing niche.</div>'; return; }
-  list.innerHTML = contacts.map((c, i) => {
-    const [bg, fg] = avatarColors[i % avatarColors.length];
-    return `<div class="contact-card">
-      <div class="avatar" style="background:${bg};color:${fg};">${initials(c.name)}</div>
-      <div class="contact-info">
-        <div class="contact-name">
-          ${c.name}
-          <a class="yt-link" href="${c.url}" target="_blank">↗ YouTube</a>
-        </div>
-        <div class="contact-bio">${c.bio || c.reason || ''}</div>
-        <div class="contact-meta">
-          <span class="pill pill-subs">▶ ${c.subscribers} subs</span>
-          `<span class="pill pill-email">✉ ${c.email}</span>`
-          ${c.country ? `<span class="pill" style="background:var(--surface2);color:var(--muted);">${c.country}</span>` : ''}
-        </div>
-      </div>
-      <div class="score-bar">
-        <div class="score-num" style="color:${scoreColor(c.score)}">${c.score}</div>
-        <div class="score-label">/ 10</div>
-      </div>
-    </div>`;
+  var list = document.getElementById('contactList');
+  if (!contacts.length) {
+    list.innerHTML = '<div class="empty">No results with emails found. Try lowering the min score.</div>';
+    return;
+  }
+  list.innerHTML = contacts.map(function(c, i) {
+    var colors = avatarColors[i % avatarColors.length];
+    return '<div class="contact-card">' +
+      '<div class="avatar" style="background:' + colors[0] + ';color:' + colors[1] + ';">' + initials(c.name) + '</div>' +
+      '<div class="contact-info">' +
+        '<div class="contact-name">' + c.name +
+          '<a class="yt-link" href="' + c.url + '" target="_blank">↗ YouTube</a>' +
+        '</div>' +
+        '<div class="contact-bio">' + (c.bio || c.reason || '') + '</div>' +
+        '<div class="contact-meta">' +
+          '<span class="pill pill-subs">▶ ' + c.subscribers + ' subs</span>' +
+          '<span class="pill pill-email">✉ ' + c.email + '</span>' +
+          (c.country ? '<span class="pill" style="background:var(--surface2);color:var(--muted);">' + c.country + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="score-bar">' +
+        '<div class="score-num" style="color:' + scoreColor(c.score) + '">' + c.score + '</div>' +
+        '<div class="score-lbl">/ 10</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 
@@ -271,9 +292,9 @@ function exportCSV() {
   fetch('/api/export', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contacts: allContacts }),
-  }).then(r => r.blob()).then(blob => {
-    const a = document.createElement('a');
+    body: JSON.stringify({ contacts: allContacts })
+  }).then(function(r){ return r.blob(); }).then(function(blob) {
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'youtube-influencers.csv';
     a.click();
