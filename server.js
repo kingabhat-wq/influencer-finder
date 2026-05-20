@@ -8,11 +8,11 @@ app.use(express.static("public"));
 function sgSearch(query, SGAI_KEY) {
   return new Promise((resolve) => {
     const body = JSON.stringify({
-      user_prompt: query,
-      num_results: 10,
-      country_search: "us",
+      query: query,
+      numResults: 10,
+      locationGeoCode: "us",
       prompt: "Extract influencer profiles: full name, Twitter/X handle (with @), estimated follower count, bio description, niche category (ai/hardware/tech/startup/creator), and contact email if visible.",
-      output_schema: {
+      outputSchema: {
         type: "object",
         properties: {
           influencers: {
@@ -34,12 +34,12 @@ function sgSearch(query, SGAI_KEY) {
     });
 
     const options = {
-      hostname: "api.scrapegraphai.com",
-      path: "/v1/search",
+      hostname: "v2-api.scrapegraphai.com",
+      path: "/api/search",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        SGAI_APIKEY: SGAI_KEY,
+        "SGAI-APIKEY": SGAI_KEY,
         "Content-Length": Buffer.byteLength(body),
       },
     };
@@ -50,7 +50,9 @@ function sgSearch(query, SGAI_KEY) {
       res.on("end", () => {
         try {
           const parsed = JSON.parse(data);
-          const list = parsed?.result?.influencers || parsed?.influencers || parsed?.result || [];
+          // v2 response: parsed.result or parsed.results or parsed directly
+          const raw = parsed?.result || parsed?.results || parsed;
+          const list = raw?.influencers || (Array.isArray(raw) ? raw : []);
           resolve(Array.isArray(list) ? list : []);
         } catch { resolve([]); }
       });
@@ -145,6 +147,12 @@ app.post("/api/find", async (req, res) => {
 
     send("log", { msg: `  ✓ ${results.length} found, ${added} new (total: ${all.length})`, level: "ok" });
     if (i < queries.length - 1) await new Promise((r) => setTimeout(r, 1500));
+  }
+
+  if (all.length === 0) {
+    send("log", { msg: "⚠️ No results from ScrapeGraph — check your API key and credits", level: "warn" });
+    send("done", { contacts: [], total: 0 });
+    return res.end();
   }
 
   send("log", { msg: `\n🤖 Scoring ${all.length} profiles with Gemini...`, level: "info" });
