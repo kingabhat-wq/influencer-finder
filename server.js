@@ -85,7 +85,7 @@ function formatSubs(n) {
 function geminiScore(channels, niche, GEMINI_KEY) {
   return new Promise((resolve) => {
     const prompt = `You are a growth marketer scoring YouTube creators for a ${niche} startup.
-Score each 1-10 for relevance as a potential brand partner. Consider: channel description, subscriber count (10K-500K is ideal sweet spot), topic relevance to ${niche}.
+Score each profile generously 1-10. Be liberal — give 6+ to any tech, AI, gadget, startup, software, or productivity channel. Reserve low scores (1-4) only for completely unrelated content like cooking or sports. Most tech channels should score 6-8.
 Return ONLY a valid JSON array in same order, no markdown:
 [{"score": 8, "reason": "one line"}, ...]
 
@@ -130,7 +130,7 @@ app.post("/api/find", async (req, res) => {
   res.setHeader("Connection", "keep-alive");
 
   const send = (type, data) => res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
-  const { niche = "AI + Hardware", target = 50, minScore = 6, ytKey, geminiKey } = req.body;
+  const { niche = "AI + Hardware", target = 50, minScore = 4, ytKey, geminiKey } = req.body;
 
   if (!ytKey || !geminiKey) {
     send("log", { msg: "✗ Missing API keys", level: "warn" });
@@ -210,8 +210,8 @@ app.post("/api/find", async (req, res) => {
   }
 
   // Filter by subscriber range
-  const filtered = allChannels.filter((c) => c.subscriberCount >= 5000 && c.subscriberCount <= 2000000);
-  send("log", { msg: `✓ ${filtered.length} channels in 5K-2M subscriber range`, level: "ok" });
+  const filtered = allChannels.filter((c) => c.subscriberCount >= 1000 && c.subscriberCount <= 2000000);
+  send("log", { msg: `✓ ${filtered.length} channels in 1K-2M subscriber range`, level: "ok" });
   send("progress", { value: 55 });
 
   if (filtered.length === 0) {
