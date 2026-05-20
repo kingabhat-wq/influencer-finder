@@ -254,7 +254,7 @@ function renderCards(contacts) {
         <div class="contact-bio">${c.bio || c.reason || ''}</div>
         <div class="contact-meta">
           <span class="pill pill-subs">▶ ${c.subscribers} subs</span>
-          ${c.email ? `<span class="pill pill-email">✉ ${c.email}</span>` : `<span class="pill pill-no-email">no email found</span>`}
+          `<span class="pill pill-email">✉ ${c.email}</span>`
           ${c.country ? `<span class="pill" style="background:var(--surface2);color:var(--muted);">${c.country}</span>` : ''}
         </div>
       </div>

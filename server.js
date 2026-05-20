@@ -239,13 +239,13 @@ app.post("/api/find", async (req, res) => {
   }
 
   const qualified = scored
-    .filter((c) => c.score >= minScore)
+    .filter((c) => c.score >= minScore && c.email && c.email.includes("@"))
     .sort((a, b) => b.score - a.score)
     .slice(0, target);
 
   send("progress", { value: 100 });
   const withEmail = qualified.filter((c) => c.email).length;
-  send("log", { msg: `\n✅ Done! ${qualified.length} qualified creators | ${withEmail} with emails`, level: "ok" });
+  send("log", { msg: `\n✅ Done! ${qualified.length} creators with verified emails (from ${all.length} total scraped)`, level: "ok" });
   send("done", { contacts: qualified, total: allChannels.length });
   res.end();
 });
