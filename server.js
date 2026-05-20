@@ -5,73 +5,92 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-function sgSearch(query, SGAI_KEY) {
+// ── YouTube search for channels ─────────────────────────────────────────────
+function ytSearch(query, YT_KEY) {
   return new Promise((resolve) => {
-    const body = JSON.stringify({
-      query: query,
-      numResults: 10,
-      locationGeoCode: "us",
-      prompt: "Extract influencer profiles: full name, Twitter/X handle (with @), estimated follower count, bio description, niche category (ai/hardware/tech/startup/creator), and contact email if visible.",
-      outputSchema: {
-        type: "object",
-        properties: {
-          influencers: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                handle: { type: "string" },
-                followers: { type: "string" },
-                bio: { type: "string" },
-                niche: { type: "string" },
-                email: { type: "string" },
-              },
-            },
-          },
-        },
-      },
+    const params = new URLSearchParams({
+      part: "snippet",
+      q: query,
+      type: "channel",
+      maxResults: 20,
+      regionCode: "US",
+      key: YT_KEY,
     });
-
     const options = {
-      hostname: "v2-api.scrapegraphai.com",
-      path: "/api/search",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "SGAI-APIKEY": SGAI_KEY,
-        "Content-Length": Buffer.byteLength(body),
-      },
+      hostname: "www.googleapis.com",
+      path: `/youtube/v3/search?${params}`,
+      method: "GET",
     };
-
     const req = https.request(options, (res) => {
       let data = "";
       res.on("data", (c) => (data += c));
       res.on("end", () => {
         try {
           const parsed = JSON.parse(data);
-          // v2 response: parsed.result or parsed.results or parsed directly
-          const raw = parsed?.result || parsed?.results || parsed;
-          const list = raw?.influencers || (Array.isArray(raw) ? raw : []);
-          resolve(Array.isArray(list) ? list : []);
-        } catch { resolve([]); }
+          if (parsed.error) { resolve({ error: parsed.error.message, items: [] }); return; }
+          resolve({ items: parsed.items || [] });
+        } catch { resolve({ items: [] }); }
       });
     });
-    req.on("error", () => resolve([]));
-    req.write(body);
+    req.on("error", () => resolve({ items: [] }));
     req.end();
   });
 }
 
-function geminiScore(influencers, niche, GEMINI_KEY) {
+// ── Get channel details (subscribers, email, description) ───────────────────
+function ytChannelDetails(channelIds, YT_KEY) {
   return new Promise((resolve) => {
-    const prompt = `You are a growth marketer scoring influencers for a ${niche} startup.
-Score each profile 1-10 for relevance. Consider: bio keywords, follower range (5K-500K ideal), niche fit.
-Return ONLY a valid JSON array in the same order, no markdown, no explanation:
-[{"score": 8, "reason": "one line reason"}, ...]
+    const params = new URLSearchParams({
+      part: "snippet,statistics,brandingSettings",
+      id: channelIds.join(","),
+      key: YT_KEY,
+    });
+    const options = {
+      hostname: "www.googleapis.com",
+      path: `/youtube/v3/channels?${params}`,
+      method: "GET",
+    };
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (c) => (data += c));
+      res.on("end", () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) { resolve([]); return; }
+          resolve(parsed.items || []);
+        } catch { resolve([]); }
+      });
+    });
+    req.on("error", () => resolve([]));
+    req.end();
+  });
+}
 
-Profiles:
-${influencers.map((inf, i) => `${i + 1}. ${inf.name} | ${inf.handle} | ${inf.followers} | Bio: ${inf.bio}`).join("\n")}`;
+// ── Extract email from description ─────────────────────────────────────────
+function extractEmail(text) {
+  if (!text) return "";
+  const match = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
+  return match ? match[0] : "";
+}
+
+// ── Format subscriber count ─────────────────────────────────────────────────
+function formatSubs(n) {
+  const num = parseInt(n || 0);
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return Math.round(num / 1000) + "K";
+  return String(num);
+}
+
+// ── Gemini scoring ──────────────────────────────────────────────────────────
+function geminiScore(channels, niche, GEMINI_KEY) {
+  return new Promise((resolve) => {
+    const prompt = `You are a growth marketer scoring YouTube creators for a ${niche} startup.
+Score each 1-10 for relevance as a potential brand partner. Consider: channel description, subscriber count (10K-500K is ideal sweet spot), topic relevance to ${niche}.
+Return ONLY a valid JSON array in same order, no markdown:
+[{"score": 8, "reason": "one line"}, ...]
+
+Channels:
+${channels.map((c, i) => `${i + 1}. ${c.name} | ${c.subscribers} subs | Topics: ${c.bio?.substring(0, 120)}`).join("\n")}`;
 
     const body = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
@@ -79,15 +98,11 @@ ${influencers.map((inf, i) => `${i + 1}. ${inf.name} | ${inf.handle} | ${inf.fol
     });
 
     const path = `/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-
     const options = {
       hostname: "generativelanguage.googleapis.com",
       path,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(body),
-      },
+      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
     };
 
     const req = https.request(options, (res) => {
@@ -108,94 +123,151 @@ ${influencers.map((inf, i) => `${i + 1}. ${inf.name} | ${inf.handle} | ${inf.fol
   });
 }
 
+// ── Main pipeline ───────────────────────────────────────────────────────────
 app.post("/api/find", async (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
   const send = (type, data) => res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
-  const { niche = "AI + Hardware", target = 50, minScore = 6, sgKey, geminiKey } = req.body;
+  const { niche = "AI + Hardware", target = 50, minScore = 6, ytKey, geminiKey } = req.body;
 
-  if (!sgKey || !geminiKey) {
+  if (!ytKey || !geminiKey) {
     send("log", { msg: "✗ Missing API keys", level: "warn" });
     return res.end();
   }
 
   const queries = [
-    `top ${niche} influencers Twitter X followers bio`,
-    `${niche} startup founders creators Twitter large following`,
-    `${niche} YouTube tech reviewers contact email business`,
-    `${niche} newsletter writers thought leaders Twitter`,
-    `US tech influencers ${niche} early adopters contact`,
+    `${niche} review tech`,
+    `${niche} tutorial beginner`,
+    `AI gadgets hardware unboxing`,
+    `tech startup founder YouTube`,
+    `${niche} channel 2024`,
+    `AI tools software review`,
+    `consumer tech gadgets`,
+    `startup technology channel`,
   ];
 
-  send("log", { msg: `🚀 Pipeline started — target: ${target} contacts`, level: "info" });
+  send("log", { msg: `🚀 Searching YouTube for ${niche} creators...`, level: "info" });
 
-  const all = [];
-  const seen = new Set();
+  const allChannelIds = new Set();
+  const channelMap = {};
 
   for (let i = 0; i < queries.length; i++) {
-    send("log", { msg: `🔍 [${i + 1}/${queries.length}] ${queries[i].substring(0, 55)}...`, level: "info" });
-    send("progress", { value: Math.round((i / queries.length) * 45) });
+    send("log", { msg: `🔍 [${i + 1}/${queries.length}] "${queries[i]}"`, level: "info" });
+    send("progress", { value: Math.round((i / queries.length) * 35) });
 
-    const results = await sgSearch(queries[i], sgKey);
+    const result = await ytSearch(queries[i], ytKey);
+
+    if (result.error) {
+      send("log", { msg: `✗ YouTube API error: ${result.error}`, level: "warn" });
+      send("done", { contacts: [], total: 0 });
+      return res.end();
+    }
+
     let added = 0;
-    results.forEach((inf) => {
-      const key = (inf.handle || inf.name || "").toLowerCase().trim();
-      if (key && !seen.has(key) && inf.name) { seen.add(key); all.push(inf); added++; }
+    result.items.forEach((item) => {
+      const id = item?.snippet?.channelId || item?.id?.channelId;
+      if (id && !allChannelIds.has(id)) {
+        allChannelIds.add(id);
+        channelMap[id] = { name: item.snippet?.channelTitle, id };
+        added++;
+      }
     });
 
-    send("log", { msg: `  ✓ ${results.length} found, ${added} new (total: ${all.length})`, level: "ok" });
-    if (i < queries.length - 1) await new Promise((r) => setTimeout(r, 1500));
+    send("log", { msg: `  ✓ ${result.items.length} found, ${added} new (total: ${allChannelIds.size})`, level: "ok" });
+    await new Promise((r) => setTimeout(r, 300));
   }
 
-  if (all.length === 0) {
-    send("log", { msg: "⚠️ No results from ScrapeGraph — check your API key and credits", level: "warn" });
+  send("log", { msg: `\n📊 Fetching details for ${allChannelIds.size} channels...`, level: "info" });
+  send("progress", { value: 40 });
+
+  // Fetch channel details in batches of 50 (YouTube API limit)
+  const idArray = [...allChannelIds];
+  const allChannels = [];
+  for (let i = 0; i < idArray.length; i += 50) {
+    const batch = idArray.slice(i, i + 50);
+    const details = await ytChannelDetails(batch, ytKey);
+    details.forEach((ch) => {
+      const subs = parseInt(ch.statistics?.subscriberCount || 0);
+      const desc = ch.snippet?.description || "";
+      const email = extractEmail(desc) ||
+        extractEmail(ch.brandingSettings?.channel?.description || "");
+
+      allChannels.push({
+        name: ch.snippet?.title || "",
+        id: ch.id,
+        subscribers: formatSubs(subs),
+        subscriberCount: subs,
+        bio: desc.substring(0, 200),
+        email: email,
+        niche: niche,
+        url: `https://youtube.com/channel/${ch.id}`,
+        country: ch.snippet?.country || "",
+      });
+    });
+    send("log", { msg: `  ✓ Got details for batch ${Math.floor(i / 50) + 1}`, level: "ok" });
+  }
+
+  // Filter by subscriber range
+  const filtered = allChannels.filter((c) => c.subscriberCount >= 5000 && c.subscriberCount <= 2000000);
+  send("log", { msg: `✓ ${filtered.length} channels in 5K-2M subscriber range`, level: "ok" });
+  send("progress", { value: 55 });
+
+  if (filtered.length === 0) {
+    send("log", { msg: "⚠️ No channels found in range. Check your YouTube API key.", level: "warn" });
     send("done", { contacts: [], total: 0 });
     return res.end();
   }
 
-  send("log", { msg: `\n🤖 Scoring ${all.length} profiles with Gemini...`, level: "info" });
-  send("progress", { value: 50 });
+  send("log", { msg: `\n🤖 Scoring ${filtered.length} channels with Gemini...`, level: "info" });
 
   const scored = [];
   const batchSize = 15;
-  for (let i = 0; i < all.length; i += batchSize) {
-    const batch = all.slice(i, i + batchSize);
+  for (let i = 0; i < filtered.length; i += batchSize) {
+    const batch = filtered.slice(i, i + batchSize);
     const bNum = Math.floor(i / batchSize) + 1;
-    const bTotal = Math.ceil(all.length / batchSize);
+    const bTotal = Math.ceil(filtered.length / batchSize);
     send("log", { msg: `⚡ Scoring batch ${bNum}/${bTotal}...`, level: "info" });
     const scores = await geminiScore(batch, niche, geminiKey);
-    batch.forEach((inf, j) => {
-      inf.score = scores[j]?.score || 5;
-      inf.reason = scores[j]?.reason || "";
-      scored.push(inf);
+    batch.forEach((ch, j) => {
+      ch.score = scores[j]?.score || 5;
+      ch.reason = scores[j]?.reason || "";
+      scored.push(ch);
     });
-    send("progress", { value: 50 + Math.round(((i + batchSize) / all.length) * 45) });
+    send("progress", { value: 55 + Math.round(((i + batchSize) / filtered.length) * 40) });
   }
 
   const qualified = scored
-    .filter((i) => i.score >= minScore)
+    .filter((c) => c.score >= minScore)
     .sort((a, b) => b.score - a.score)
     .slice(0, target);
 
   send("progress", { value: 100 });
-  send("log", { msg: `\n✅ Done! ${qualified.length} qualified contacts out of ${all.length} scraped`, level: "ok" });
-  send("done", { contacts: qualified, total: all.length });
+  const withEmail = qualified.filter((c) => c.email).length;
+  send("log", { msg: `\n✅ Done! ${qualified.length} qualified creators | ${withEmail} with emails`, level: "ok" });
+  send("done", { contacts: qualified, total: allChannels.length });
   res.end();
 });
 
+// ── CSV export ──────────────────────────────────────────────────────────────
 app.post("/api/export", (req, res) => {
   const { contacts } = req.body;
-  const headers = ["Name", "Handle", "Followers", "Niche", "Bio", "Email", "Score", "Reason", "Status"];
+  const headers = ["Name", "Subscribers", "Email", "Niche", "YouTube URL", "Bio", "Score", "Reason", "Status"];
   const rows = contacts.map((c) => [
-    `"${c.name || ""}"`, `"${c.handle || ""}"`, `"${c.followers || ""}"`, `"${c.niche || ""}"`,
-    `"${(c.bio || "").replace(/"/g, "'").substring(0, 120)}"`, `"${c.email || ""}"`,
-    c.score || "", `"${(c.reason || "").replace(/"/g, "'")}"`, '"New"',
+    `"${c.name || ""}"`,
+    `"${c.subscribers || ""}"`,
+    `"${c.email || ""}"`,
+    `"${c.niche || ""}"`,
+    `"${c.url || ""}"`,
+    `"${(c.bio || "").replace(/"/g, "'").substring(0, 120)}"`,
+    c.score || "",
+    `"${(c.reason || "").replace(/"/g, "'")}"`,
+    '"New"',
   ]);
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
   res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", 'attachment; filename="influencers.csv"');
+  res.setHeader("Content-Disposition", 'attachment; filename="youtube-influencers.csv"');
   res.send(csv);
 });
 
