@@ -3,139 +3,196 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>YouTube Influencer Finder</title>
+<title>GPT Prompt Maker — Influencer Finder</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#0a0a0b;--surface:#111113;--surface2:#1a1a1d;
-  --border:#2a2a2e;--border2:#3a3a3f;--text:#f0f0f2;--muted:#888890;
-  --red:#ff4444;--red2:#cc2222;--green:#22c55e;--amber:#f59e0b;
-  --blue:#4f8ef7;--purple:#a78bfa;
+  --border:#2a2a2e;--border2:#3a3a3f;--text:#f0f0f2;--muted:#666;
+  --accent:#7c3aed;--accent2:#6d28d9;
+  --green:#22c55e;--amber:#f59e0b;--blue:#4f8ef7;--purple:#a78bfa;
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
-header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+header{border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
 .logo{display:flex;align-items:center;gap:10px;}
-.logo-icon{color:var(--red);font-size:20px;}
-.logo-text{font-family:var(--mono);font-size:14px;letter-spacing:0.05em;}
-.badge{font-size:11px;background:#2d1010;color:var(--red);padding:3px 10px;border-radius:999px;font-family:var(--mono);}
-main{max-width:900px;margin:0 auto;padding:40px 24px;}
-h1{font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-bottom:6px;}
-.subtitle{color:var(--muted);font-size:15px;margin-bottom:36px;}
-.keys-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
-.config-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
-.field{display:flex;flex-direction:column;gap:6px;}
+.logo-mark{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;font-family:var(--mono);}
+.logo-text{font-size:14px;font-weight:500;color:var(--text);}
+.logo-sub{font-size:12px;color:var(--muted);margin-left:4px;}
+.badge{font-size:11px;background:#1e1030;color:var(--purple);padding:3px 10px;border-radius:999px;font-family:var(--mono);}
+main{max-width:960px;margin:0 auto;padding:36px 24px;}
+h1{font-size:26px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px;}
+.subtitle{color:var(--muted);font-size:14px;margin-bottom:32px;}
+.section-label{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+.keys-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.field{display:flex;flex-direction:column;gap:5px;}
 label{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;}
-.hint{font-size:11px;color:#555;margin-top:-2px;}
+.hint{font-size:11px;color:#444;}
 .hint a{color:var(--blue);text-decoration:none;}
 select,input[type="number"],input[type="password"]{
   background:var(--surface);border:1px solid var(--border);color:var(--text);
-  padding:10px 12px;border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;
+  padding:9px 12px;border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;
 }
-select:focus,input:focus{border-color:var(--red);}
-#runBtn{
-  width:100%;padding:14px;background:var(--red);color:#fff;border:none;
-  border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;
-  font-family:var(--sans);margin-bottom:28px;transition:background 0.15s;
-}
-#runBtn:hover{background:var(--red2);}
+select:focus,input:focus{border-color:var(--accent);}
+
+/* Country chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
+.chip{padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--mono);transition:all 0.15s;user-select:none;}
+.chip.on{background:#1e1030;color:var(--purple);border-color:var(--accent);}
+
+/* Cluster checkboxes */
+.clusters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+.cluster-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.15s;}
+.cluster-item.on{border-color:var(--accent);}
+.cluster-item input{display:none;}
+.cluster-check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border2);background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.cluster-item.on .cluster-check{background:var(--accent);border-color:var(--accent);}
+.cluster-name{font-size:13px;font-weight:500;}
+.cluster-count{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+.config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+#runBtn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:28px;transition:background 0.15s;}
+#runBtn:hover{background:var(--accent2);}
 #runBtn:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
-.pipeline{display:none;margin-bottom:28px;}
+
+.pipeline{display:none;margin-bottom:24px;}
 .pipeline.show{display:block;}
-.progress-track{background:var(--surface2);border-radius:999px;height:4px;margin-bottom:16px;overflow:hidden;}
-.progress-fill{height:100%;background:var(--red);border-radius:999px;transition:width 0.4s ease;width:0%;}
-.log-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-family:var(--mono);font-size:12px;max-height:200px;overflow-y:auto;line-height:2;}
+.progress-track{background:var(--surface2);border-radius:999px;height:4px;margin-bottom:14px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:999px;transition:width 0.4s ease;width:0%;}
+.log-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:12px;max-height:180px;overflow-y:auto;line-height:1.9;}
 .log-ok{color:var(--green);}.log-info{color:var(--blue);}.log-warn{color:var(--amber);}
-.stats{display:none;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+
+.stats{display:none;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
 .stats.show{display:grid;}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
-.stat-val{font-size:26px;font-weight:600;font-family:var(--mono);}
-.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.stat-val{font-size:24px;font-weight:600;font-family:var(--mono);}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.06em;}
+
 .results{display:none;}
 .results.show{display:block;}
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.results-header h2{font-size:16px;font-weight:500;}
-.export-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);}
-.export-btn:hover{border-color:var(--red);color:var(--red);}
-.contact-list{display:flex;flex-direction:column;gap:8px;}
-.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;animation:fadeIn 0.3s ease;}
-.contact-card:hover{border-color:var(--border2);}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0;font-family:var(--mono);}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.results-header h2{font-size:15px;font-weight:500;}
+.export-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);}
+.export-btn:hover{border-color:var(--accent);color:var(--purple);}
+.contact-list{display:flex;flex-direction:column;gap:7px;}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:13px;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0;font-family:var(--mono);}
 .contact-info{flex:1;min-width:0;}
 .contact-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;}
-.yt-link{font-size:11px;color:var(--red);text-decoration:none;font-family:var(--mono);}
-.contact-bio{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;}
-.contact-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
-.pill{font-size:11px;padding:2px 8px;border-radius:999px;font-family:var(--mono);}
+.yt-link{font-size:11px;color:var(--accent);text-decoration:none;font-family:var(--mono);}
+.contact-bio{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px;}
+.contact-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
+.pill{font-size:11px;padding:2px 7px;border-radius:999px;font-family:var(--mono);}
 .pill-subs{background:#1a1a2e;color:var(--blue);}
-.pill-email{background:#1a2e1a;color:var(--green);}
+.pill-email{background:#1a1a2e;color:var(--purple);}
+.pill-country{background:var(--surface2);color:var(--muted);}
 .score-bar{text-align:right;flex-shrink:0;}
 .score-num{font-family:var(--mono);font-size:18px;font-weight:500;}
-.score-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
-.empty{text-align:center;padding:60px;color:var(--muted);font-size:14px;}
+.score-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;}
+.empty{text-align:center;padding:50px;color:var(--muted);font-size:14px;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:999px;}
-@media(max-width:640px){.keys-row,.config-grid{grid-template-columns:1fr;}.stats{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.keys-row,.config-row,.clusters{grid-template-columns:1fr;}.stats{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">▶</div>
-    <div class="logo-text">youtube-influencer-finder</div>
+    <div class="logo-mark">GPM</div>
+    <div class="logo-text">GPT Prompt Maker <span class="logo-sub">— Influencer Finder</span></div>
   </div>
   <div class="badge">YouTube + Gemini AI</div>
 </header>
 
 <main>
   <h1>Find YouTube Creator Contacts</h1>
-  <p class="subtitle">YouTube Data API → Gemini AI scores → emails extracted → CSV export</p>
+  <p class="subtitle">Search by keyword cluster × country → Gemini scores → extract emails → export CSV</p>
 
   <div class="keys-row">
     <div class="field">
       <label>YouTube Data API Key</label>
       <input type="password" id="ytKey" placeholder="AIzaSy..."/>
-      <div class="hint">Free → <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Enable YouTube Data API v3</div>
+      <div class="hint"><a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Enable YouTube Data API v3 → Credentials → API Key</div>
     </div>
     <div class="field">
       <label>Gemini API Key</label>
       <input type="password" id="geminiKey" placeholder="AIzaSy..."/>
-      <div class="hint">Free → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>
+      <div class="hint"><a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> → Create API Key (free)</div>
     </div>
   </div>
 
-  <div class="config-grid">
-    <div class="field">
-      <label>Niche</label>
-      <select id="niche">
-        <option>AI + Hardware</option>
-        <option>Consumer Tech</option>
-        <option>Startup & Founder</option>
-        <option>Developer Tools</option>
-        <option>B2B SaaS</option>
-        <option>EdTech</option>
-        <option>Gadgets & Unboxing</option>
-      </select>
+  <div class="section-label">Target Countries</div>
+  <div class="chips" id="countryChips">
+    <div class="chip on" data-code="US">🇺🇸 US</div>
+    <div class="chip" data-code="IN">🇮🇳 India</div>
+    <div class="chip" data-code="GB">🇬🇧 UK</div>
+    <div class="chip" data-code="CA">🇨🇦 Canada</div>
+    <div class="chip" data-code="AU">🇦🇺 Australia</div>
+    <div class="chip" data-code="DE">🇩🇪 Germany</div>
+    <div class="chip" data-code="BR">🇧🇷 Brazil</div>
+    <div class="chip" data-code="PH">🇵🇭 Philippines</div>
+    <div class="chip" data-code="NG">🇳🇬 Nigeria</div>
+    <div class="chip" data-code="SG">🇸🇬 Singapore</div>
+  </div>
+
+  <div class="section-label">Keyword Clusters</div>
+  <div class="clusters" id="clusterList">
+    <div class="cluster-item on" data-cluster="Prompt Engineering">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">Prompt Engineering</div><div class="cluster-count">5 keywords</div></div>
     </div>
+    <div class="cluster-item on" data-cluster="ChatGPT Tutorials">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">ChatGPT Tutorials</div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="AI Tools">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">AI Tools</div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="Midjourney & Image AI">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">Midjourney & Image AI</div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="AI for Business">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">AI for Business</div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="AI Productivity">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">AI Productivity</div><div class="cluster-count">5 keywords</div></div>
+    </div>
+  </div>
+
+  <div class="config-row">
     <div class="field">
       <label>Target contacts</label>
-      <input type="number" id="target" value="50" min="10" max="150"/>
+      <input type="number" id="target" value="200" min="50" max="1000"/>
     </div>
     <div class="field">
-      <label>Min score</label>
+      <label>Min subscribers</label>
+      <select id="minSubs">
+        <option value="1000">1K+</option>
+        <option value="5000" selected>5K+</option>
+        <option value="10000">10K+</option>
+        <option value="50000">50K+</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Min relevance score</label>
       <select id="minScore">
-        <option value="4" selected>4+ (show all)</option>
-        <option value="5">5+ (wider net)</option>
-        <option value="6">6+ (balanced)</option>
+        <option value="4">4+ (all)</option>
+        <option value="5">5+ (wider)</option>
+        <option value="6" selected>6+ (balanced)</option>
         <option value="7">7+ (strict)</option>
+        <option value="8">8+ (best only)</option>
       </select>
     </div>
   </div>
 
-  <button id="runBtn">▶ Find YouTube Creators</button>
+  <button id="runBtn">▶ Find Creators</button>
 
   <div class="pipeline" id="pipeline">
     <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
@@ -145,8 +202,8 @@ select:focus,input:focus{border-color:var(--red);}
   <div class="stats" id="stats">
     <div class="stat"><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Channels found</div></div>
     <div class="stat"><div class="stat-val" id="sQual" style="color:var(--green)">0</div><div class="stat-lbl">Qualified</div></div>
-    <div class="stat"><div class="stat-val" id="sEmail" style="color:var(--green)">0</div><div class="stat-lbl">With emails</div></div>
-    <div class="stat"><div class="stat-val" id="sAvg" style="color:var(--purple)">0</div><div class="stat-lbl">Avg score</div></div>
+    <div class="stat"><div class="stat-val" id="sEmail" style="color:var(--purple)">0</div><div class="stat-lbl">With emails</div></div>
+    <div class="stat"><div class="stat-val" id="sAvg" style="color:var(--amber)">0</div><div class="stat-lbl">Avg score</div></div>
   </div>
 
   <div class="results" id="results">
@@ -161,26 +218,40 @@ select:focus,input:focus{border-color:var(--red);}
 <script>
 var allContacts = [];
 var avatarColors = [
-  ['#2d1010','#ff6b6b'],['#1a2e1a','#22c55e'],
-  ['#1a1a2e','#4f8ef7'],['#2d1228','#a78bfa'],['#2d2010','#f59e0b']
+  ['#1e1030','#a78bfa'],['#1a2e1a','#22c55e'],
+  ['#1a1a2e','#4f8ef7'],['#2d1010','#ff6b6b'],['#2d2010','#f59e0b']
 ];
 
+// Country chips
+document.querySelectorAll('.chip').forEach(function(chip) {
+  chip.addEventListener('click', function() { chip.classList.toggle('on'); });
+});
+
+// Cluster items
+document.querySelectorAll('.cluster-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    item.classList.toggle('on');
+    item.querySelector('.cluster-check').textContent = item.classList.contains('on') ? '✓' : '';
+  });
+});
+
+function getSelectedCountries() {
+  return Array.from(document.querySelectorAll('.chip.on')).map(function(c){ return c.dataset.code; });
+}
+function getSelectedClusters() {
+  return Array.from(document.querySelectorAll('.cluster-item.on')).map(function(c){ return c.dataset.cluster; });
+}
 function initials(name) {
-  return (name || '??').split(' ').map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+  return (name||'??').split(' ').map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
 }
-function scoreColor(s) {
-  return s >= 8 ? 'var(--green)' : s >= 6 ? 'var(--amber)' : 'var(--muted)';
-}
+function scoreColor(s) { return s>=8?'var(--green)':s>=6?'var(--amber)':'var(--muted)'; }
 function addLog(msg, level) {
   var box = document.getElementById('logBox');
   var div = document.createElement('div');
-  div.className = 'log-' + (level || 'info');
+  div.className = 'log-'+(level||'info');
   div.textContent = msg;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
-}
-function setProgress(v) {
-  document.getElementById('progFill').style.width = v + '%';
 }
 
 document.getElementById('runBtn').addEventListener('click', runPipeline);
@@ -189,32 +260,35 @@ document.getElementById('exportBtn').addEventListener('click', exportCSV);
 function runPipeline() {
   var ytKey = document.getElementById('ytKey').value.trim();
   var geminiKey = document.getElementById('geminiKey').value.trim();
-  if (!ytKey || !geminiKey) { alert('Please enter both API keys'); return; }
+  var countries = getSelectedCountries();
+  var clusters = getSelectedClusters();
 
-  var niche = document.getElementById('niche').value;
+  if (!ytKey || !geminiKey) { alert('Please enter both API keys'); return; }
+  if (!countries.length) { alert('Select at least one country'); return; }
+  if (!clusters.length) { alert('Select at least one keyword cluster'); return; }
+
   var target = parseInt(document.getElementById('target').value);
   var minScore = parseInt(document.getElementById('minScore').value);
+  var minSubs = parseInt(document.getElementById('minSubs').value);
 
   var btn = document.getElementById('runBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Searching YouTube...';
-
+  btn.textContent = '⏳ Running pipeline...';
   document.getElementById('pipeline').classList.add('show');
   document.getElementById('logBox').innerHTML = '';
   document.getElementById('stats').classList.remove('show');
   document.getElementById('results').classList.remove('show');
-  setProgress(0);
+  document.getElementById('progFill').style.width = '0%';
   allContacts = [];
 
   fetch('/api/find', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ niche: niche, target: target, minScore: minScore, ytKey: ytKey, geminiKey: geminiKey })
+    body: JSON.stringify({ countries: countries, clusters: clusters, target: target, minScore: minScore, minSubs: minSubs, ytKey: ytKey, geminiKey: geminiKey })
   }).then(function(res) {
     var reader = res.body.getReader();
     var decoder = new TextDecoder();
     var buffer = '';
-
     function read() {
       return reader.read().then(function(result) {
         if (result.done) return;
@@ -226,11 +300,8 @@ function runPipeline() {
           try {
             var evt = JSON.parse(line.slice(5).trim());
             if (evt.type === 'log') addLog(evt.msg, evt.level);
-            if (evt.type === 'progress') setProgress(evt.value);
-            if (evt.type === 'done') {
-              allContacts = evt.contacts;
-              showResults(evt.contacts, evt.total);
-            }
+            if (evt.type === 'progress') document.getElementById('progFill').style.width = evt.value + '%';
+            if (evt.type === 'done') { allContacts = evt.contacts; showResults(evt.contacts, evt.total); }
           } catch(e) {}
         });
         return read();
@@ -241,48 +312,45 @@ function runPipeline() {
     addLog('✗ Error: ' + e.message, 'warn');
   }).finally(function() {
     btn.disabled = false;
-    btn.textContent = '▶ Run Again';
+    btn.textContent = '▶ Find Creators';
   });
 }
 
 function showResults(contacts, total) {
   var emails = contacts.filter(function(c){ return c.email; }).length;
-  var avg = contacts.length ? (contacts.reduce(function(s,c){ return s+c.score; }, 0) / contacts.length).toFixed(1) : 0;
+  var avg = contacts.length ? (contacts.reduce(function(s,c){ return s+c.score; },0)/contacts.length).toFixed(1) : 0;
   document.getElementById('sTotal').textContent = total;
   document.getElementById('sQual').textContent = contacts.length;
   document.getElementById('sEmail').textContent = emails;
   document.getElementById('sAvg').textContent = avg;
   document.getElementById('stats').classList.add('show');
   renderCards(contacts);
-  document.getElementById('resultsTitle').textContent = contacts.length + ' YouTube Creators';
+  document.getElementById('resultsTitle').textContent = contacts.length + ' Creators with Emails';
   document.getElementById('results').classList.add('show');
 }
 
 function renderCards(contacts) {
   var list = document.getElementById('contactList');
   if (!contacts.length) {
-    list.innerHTML = '<div class="empty">No results with emails found. Try lowering the min score.</div>';
+    list.innerHTML = '<div class="empty">No results found. Try selecting more countries, clusters, or lowering the min score.</div>';
     return;
   }
   list.innerHTML = contacts.map(function(c, i) {
     var colors = avatarColors[i % avatarColors.length];
     return '<div class="contact-card">' +
-      '<div class="avatar" style="background:' + colors[0] + ';color:' + colors[1] + ';">' + initials(c.name) + '</div>' +
+      '<div class="avatar" style="background:'+colors[0]+';color:'+colors[1]+';">'+initials(c.name)+'</div>' +
       '<div class="contact-info">' +
-        '<div class="contact-name">' + c.name +
-          '<a class="yt-link" href="' + c.url + '" target="_blank">↗ YouTube</a>' +
+        '<div class="contact-name">'+c.name+
+          '<a class="yt-link" href="'+c.url+'" target="_blank">↗ YouTube</a>' +
         '</div>' +
-        '<div class="contact-bio">' + (c.bio || c.reason || '') + '</div>' +
+        '<div class="contact-bio">'+(c.reason || c.bio || '')+'</div>' +
         '<div class="contact-meta">' +
-          '<span class="pill pill-subs">▶ ' + c.subscribers + ' subs</span>' +
-          '<span class="pill pill-email">✉ ' + c.email + '</span>' +
-          (c.country ? '<span class="pill" style="background:var(--surface2);color:var(--muted);">' + c.country + '</span>' : '') +
+          '<span class="pill pill-subs">▶ '+c.subscribers+' subs</span>' +
+          '<span class="pill pill-email">✉ '+c.email+'</span>' +
+          (c.country ? '<span class="pill pill-country">'+c.country+'</span>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="score-bar">' +
-        '<div class="score-num" style="color:' + scoreColor(c.score) + '">' + c.score + '</div>' +
-        '<div class="score-lbl">/ 10</div>' +
-      '</div>' +
+      '<div class="score-bar"><div class="score-num" style="color:'+scoreColor(c.score)+'">'+c.score+'</div><div class="score-lbl">/ 10</div></div>' +
     '</div>';
   }).join('');
 }
@@ -296,7 +364,7 @@ function exportCSV() {
   }).then(function(r){ return r.blob(); }).then(function(blob) {
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'youtube-influencers.csv';
+    a.download = 'gptpromptmaker-influencers.csv';
     a.click();
   });
 }
