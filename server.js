@@ -32,7 +32,7 @@ const KEYWORD_CLUSTERS = {
     "ai productivity hacks", "chatgpt workflow", "automate with ai",
     "ai for content creators", "ai writing tools review",
   ],
-];
+};
 
 // ── YouTube search ──────────────────────────────────────────────────────────
 function ytSearch(query, regionCode, YT_KEY) {
