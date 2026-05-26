@@ -218,19 +218,19 @@ function formatSubs(n) {
 // ── Gemini scoring ──────────────────────────────────────────────────────────
 function geminiScore(channels, GEMINI_KEY) {
   return new Promise((resolve) => {
-    const prompt = `Score these YouTube channels for relevance to GPT Prompt Maker — a SaaS tool with AI prompt templates and AI strategy agents for SEO, marketing, and content.
+    const prompt = `Score these YouTube channels for GPT Prompt Maker — a SaaS prompt library and AI agent platform for marketers, indie founders, freelancers, and solopreneurs using AI in 2026.
 
-Score 1–10:
-- 8–10: prompt engineering, ChatGPT tutorials, AI tools, AI productivity, AI for marketing, solopreneurs/indie founders using AI, SEO + AI, freelancers using AI
-- 6–7: general marketing, digital marketing, productivity, tech reviews, no-code tools, online business
-- 4–5: broad tech, software reviews loosely related
-- 1–3: gaming, cooking, vlogs, sports, entertainment, finance/investing unrelated to AI
+Score 1-10:
+- 8-10: prompt engineering, ChatGPT/Claude/Gemini tutorials, AI tools, AI agents, vibe coding, AI for marketing/SEO, solopreneurs/indie founders using AI, freelancers + AI, no-code AI automation
+- 6-7: general digital marketing, productivity, tech reviews, online business, content creation, social media growth
+- 4-5: broad tech or software not specifically AI-focused
+- 1-3: gaming, cooking, vlogs, sports, finance unrelated to AI
 
-Return ONLY a raw JSON array, no markdown, no explanation:
-[{"score":8,"reason":"one short sentence"},...]
+CRITICAL: Return ONLY a raw JSON array with exactly ${channels.length} objects. No markdown, no backticks.
+Example: [{"score":8,"reason":"covers prompt engineering tutorials"}]
 
 Channels:
-${channels.map((c, i) => `${i + 1}. ${c.name} | ${c.subscribers} subs | ${(c.bio || "").substring(0, 120)}`).join("\n")}`;
+${channels.map((c, i) => `${i + 1}. ${c.name} | ${c.subscribers} subs | ${(c.bio || '').substring(0, 150)}`).join('\n')}`;
 
     const body = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
@@ -238,30 +238,45 @@ ${channels.map((c, i) => `${i + 1}. ${c.name} | ${c.subscribers} subs | ${(c.bio
     });
     const path = `/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
     const options = {
-      hostname: "generativelanguage.googleapis.com",
+      hostname: 'generativelanguage.googleapis.com',
       path,
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(body),
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
       },
     };
     const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (c) => (data += c));
-      res.on("end", () => {
+      let data = '';
+      res.on('data', (c) => (data += c));
+      res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          const text =
-            parsed?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-          const clean = text.replace(/```json|```/g, "").trim();
-          resolve(JSON.parse(clean));
-        } catch {
-          resolve([]);
+          if (parsed.error) {
+            console.error('Gemini API error:', parsed.error.message);
+            resolve(channels.map(() => ({ score: 6, reason: 'scoring unavailable' })));
+            return;
+          }
+          const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+          const clean = text.replace(/```json|```/g, '').trim();
+          console.log('Gemini preview:', clean.substring(0, 200));
+          const result = JSON.parse(clean);
+          if (!Array.isArray(result) || result.length === 0) {
+            console.error('Gemini returned empty array');
+            resolve(channels.map(() => ({ score: 6, reason: 'scoring unavailable' })));
+            return;
+          }
+          resolve(result);
+        } catch (e) {
+          console.error('Gemini parse error:', e.message);
+          resolve(channels.map(() => ({ score: 6, reason: 'scoring unavailable' })));
         }
       });
     });
-    req.on("error", () => resolve([]));
+    req.on('error', (e) => {
+      console.error('Gemini request error:', e.message);
+      resolve(channels.map(() => ({ score: 6, reason: 'scoring unavailable' })));
+    });
     req.write(body);
     req.end();
   });
@@ -330,7 +345,7 @@ app.post("/api/find", async (req, res) => {
     if (queryCount % 5 === 0) {
       send("log", { msg: `  → ${Object.keys(channelClusterMap).length} unique channels so far`, level: "ok" });
     }
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 800));
   }
 
   const allChannelIds = Object.keys(channelClusterMap);
@@ -399,7 +414,7 @@ app.post("/api/find", async (req, res) => {
     });
     const scores = await geminiScore(batch, geminiKey);
     batch.forEach((ch, j) => {
-      ch.score = scores[j]?.score || 5;
+      ch.score = (scores[j] && scores[j].score != null) ? scores[j].score : 6;
       ch.reason = scores[j]?.reason || "";
       scored.push(ch);
     });
