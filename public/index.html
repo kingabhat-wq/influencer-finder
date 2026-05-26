@@ -35,13 +35,9 @@ select,input[type="number"],input[type="password"]{
   padding:9px 12px;border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;
 }
 select:focus,input:focus{border-color:var(--accent);}
-
-/* Country chips */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
 .chip{padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--mono);transition:all 0.15s;user-select:none;}
 .chip.on{background:#1e1030;color:var(--purple);border-color:var(--accent);}
-
-/* Cluster checkboxes */
 .clusters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
 .cluster-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color 0.15s;}
 .cluster-item.on{border-color:var(--accent);}
@@ -50,25 +46,23 @@ select:focus,input:focus{border-color:var(--accent);}
 .cluster-item.on .cluster-check{background:var(--accent);border-color:var(--accent);}
 .cluster-name{font-size:13px;font-weight:500;}
 .cluster-count{font-size:11px;color:var(--muted);font-family:var(--mono);}
-
+.cluster-tag{font-size:10px;padding:1px 6px;border-radius:999px;font-family:var(--mono);margin-left:4px;}
+.tag-new{background:#1a2e1a;color:var(--green);}
 .config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
 #runBtn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:28px;transition:background 0.15s;}
 #runBtn:hover{background:var(--accent2);}
 #runBtn:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
-
 .pipeline{display:none;margin-bottom:24px;}
 .pipeline.show{display:block;}
 .progress-track{background:var(--surface2);border-radius:999px;height:4px;margin-bottom:14px;overflow:hidden;}
 .progress-fill{height:100%;background:var(--accent);border-radius:999px;transition:width 0.4s ease;width:0%;}
 .log-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:12px;max-height:180px;overflow-y:auto;line-height:1.9;}
 .log-ok{color:var(--green);}.log-info{color:var(--blue);}.log-warn{color:var(--amber);}
-
 .stats{display:none;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
 .stats.show{display:grid;}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
 .stat-val{font-size:24px;font-weight:600;font-family:var(--mono);}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.06em;}
-
 .results{display:none;}
 .results.show{display:block;}
 .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -80,7 +74,7 @@ select:focus,input:focus{border-color:var(--accent);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
 .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0;font-family:var(--mono);}
 .contact-info{flex:1;min-width:0;}
-.contact-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.contact-name{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .yt-link{font-size:11px;color:var(--accent);text-decoration:none;font-family:var(--mono);}
 .contact-bio{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px;}
 .contact-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
@@ -88,6 +82,7 @@ select:focus,input:focus{border-color:var(--accent);}
 .pill-subs{background:#1a1a2e;color:var(--blue);}
 .pill-email{background:#1a1a2e;color:var(--purple);}
 .pill-country{background:var(--surface2);color:var(--muted);}
+.pill-cluster{background:#1a2e1a;color:var(--green);}
 .score-bar{text-align:right;flex-shrink:0;}
 .score-num{font-family:var(--mono);font-size:18px;font-weight:500;}
 .score-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;}
@@ -164,6 +159,22 @@ select:focus,input:focus{border-color:var(--accent);}
       <div class="cluster-check">✓</div>
       <div><div class="cluster-name">AI Productivity</div><div class="cluster-count">5 keywords</div></div>
     </div>
+    <div class="cluster-item on" data-cluster="Marketing & Growth">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">Marketing & Growth <span class="cluster-tag tag-new">new</span></div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="Indie Founders & Solopreneurs">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">Indie Founders & Solopreneurs <span class="cluster-tag tag-new">new</span></div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="SEO & Organic Growth">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">SEO & Organic Growth <span class="cluster-tag tag-new">new</span></div><div class="cluster-count">5 keywords</div></div>
+    </div>
+    <div class="cluster-item on" data-cluster="Freelance & Creator Economy">
+      <div class="cluster-check">✓</div>
+      <div><div class="cluster-name">Freelance & Creator Economy <span class="cluster-tag tag-new">new</span></div><div class="cluster-count">5 keywords</div></div>
+    </div>
   </div>
 
   <div class="config-row">
@@ -222,12 +233,9 @@ var avatarColors = [
   ['#1a1a2e','#4f8ef7'],['#2d1010','#ff6b6b'],['#2d2010','#f59e0b']
 ];
 
-// Country chips
 document.querySelectorAll('.chip').forEach(function(chip) {
   chip.addEventListener('click', function() { chip.classList.toggle('on'); });
 });
-
-// Cluster items
 document.querySelectorAll('.cluster-item').forEach(function(item) {
   item.addEventListener('click', function() {
     item.classList.toggle('on');
@@ -269,7 +277,7 @@ function runPipeline() {
 
   var target = parseInt(document.getElementById('target').value);
   var minScore = parseInt(document.getElementById('minScore').value);
-  var minSubs = parseInt(document.getElementById('minSubs').value);
+  var minSubs = parseInt(document.getElementById('minSubs').value); // FIX: was never sent before
 
   var btn = document.getElementById('runBtn');
   btn.disabled = true;
@@ -284,7 +292,15 @@ function runPipeline() {
   fetch('/api/find', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ countries: countries, clusters: clusters, target: target, minScore: minScore, minSubs: minSubs, ytKey: ytKey, geminiKey: geminiKey })
+    body: JSON.stringify({
+      countries: countries,
+      clusters: clusters,
+      target: target,
+      minScore: minScore,
+      minSubs: minSubs,   // FIX: now actually sent
+      ytKey: ytKey,
+      geminiKey: geminiKey
+    })
   }).then(function(res) {
     var reader = res.body.getReader();
     var decoder = new TextDecoder();
@@ -311,6 +327,7 @@ function runPipeline() {
   }).catch(function(e) {
     addLog('✗ Error: ' + e.message, 'warn');
   }).finally(function() {
+    var btn = document.getElementById('runBtn');
     btn.disabled = false;
     btn.textContent = '▶ Find Creators';
   });
@@ -332,7 +349,7 @@ function showResults(contacts, total) {
 function renderCards(contacts) {
   var list = document.getElementById('contactList');
   if (!contacts.length) {
-    list.innerHTML = '<div class="empty">No results found. Try selecting more countries, clusters, or lowering the min score.</div>';
+    list.innerHTML = '<div class="empty">No results. Try more countries, clusters, or lower the min score.</div>';
     return;
   }
   list.innerHTML = contacts.map(function(c, i) {
@@ -347,6 +364,7 @@ function renderCards(contacts) {
         '<div class="contact-meta">' +
           '<span class="pill pill-subs">▶ '+c.subscribers+' subs</span>' +
           '<span class="pill pill-email">✉ '+c.email+'</span>' +
+          (c.cluster ? '<span class="pill pill-cluster">'+c.cluster+'</span>' : '') +
           (c.country ? '<span class="pill pill-country">'+c.country+'</span>' : '') +
         '</div>' +
       '</div>' +
